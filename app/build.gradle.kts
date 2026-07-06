@@ -21,12 +21,18 @@ android {
     kotlin {
         jvmToolchain(17)
     }
+    val releaseStoreFile = project.findProperty("CLEANSWEEP_RELEASE_STORE_FILE") as String?
+    val releaseKeyAlias = project.findProperty("CLEANSWEEP_RELEASE_KEY_ALIAS") as String?
+    val hasReleaseSigning = !releaseStoreFile.isNullOrBlank() && !releaseKeyAlias.isNullOrBlank()
+
     signingConfigs {
-        create("release") {
-            // Retrieve keystore path and alias from gradle.properties
-            // Android Studio will prompt for passwords when generating signed builds.
-            storeFile = file(project.properties["CLEANSWEEP_RELEASE_STORE_FILE"] as String)
-            keyAlias = project.properties["CLEANSWEEP_RELEASE_KEY_ALIAS"] as String
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(releaseStoreFile)
+                keyAlias = releaseKeyAlias
+                storePassword = project.findProperty("CLEANSWEEP_RELEASE_STORE_PASSWORD") as String?
+                keyPassword = project.findProperty("CLEANSWEEP_RELEASE_KEY_PASSWORD") as String?
+            }
         }
     }
 
@@ -51,7 +57,9 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("release")
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

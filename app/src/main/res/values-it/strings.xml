@@ -123,6 +123,19 @@
     <string name="deselect_subfolders">Deseleziona sottocartelle</string>
     <string name="favorite">Preferito</string>
     <string name="unfavorite">Rimuovi preferito</string>
+    <string name="session_ready_status">Pronto per ordinare</string>
+    <string name="session_loading_status">Lettura cartelle multimediali</string>
+    <string name="session_refreshing_status">Aggiornamento cartelle</string>
+    <plurals name="selected_folders_status">
+        <item quantity="one">1 cartella selezionata</item>
+        <item quantity="many">%1$d cartelle selezionate</item>
+        <item quantity="other">%1$d cartelle selezionate</item>
+    </plurals>
+    <plurals name="available_folders_status">
+        <item quantity="one">1 cartella totale</item>
+        <item quantity="many">%1$d cartelle totali</item>
+        <item quantity="other">%1$d cartelle totali</item>
+    </plurals>
 
     <!-- Swiper Screen -->
     <string name="unsaved_changes_title">Modifiche non salvate</string>
@@ -259,6 +272,10 @@
         <item quantity="other">• …e altri %1$d</item>
     </plurals>
     <string name="cancel_scan">Annulla Scansione</string>
+    <string name="scan_step_choose">Scegli tipo di scansione</string>
+    <string name="scan_step_run">Esegui scansione</string>
+    <string name="scan_step_review">Rivedi risultati</string>
+    <string name="scan_progress_label">%1$d%% completato</string>
     <string name="no_exact_or_similar_found">Nessun duplicato esatto o media simile trovato. Ben fatto!</string>
     <string name="no_exact_found">Nessun duplicato esatto trovato. Ben fatto!</string>
     <string name="no_similar_found">Nessun media simile trovato. Ben fatto!</string>
@@ -359,6 +376,8 @@
     <string name="permission_screen_title">Accesso a Tutti i File Richiesto</string>
     <string name="permission_screen_desc">CleanSweep necessita del permesso di Accesso a Tutti i File per organizzare foto e video in tutte le cartelle del dispositivo.</string>
     <string name="permission_screen_instruction">Per favore concedi il permesso nelle impostazioni del dispositivo per usare CleanSweep.</string>
+    <string name="permission_required_step">Permesso richiesto</string>
+    <string name="permission_privacy_note">CleanSweep resta offline. Questo permesso viene usato solo per trovare, spostare ed eliminare media su questo dispositivo.</string>
     <string name="open_settings">Apri Impostazioni</string>
 
     <!-- Onboarding Pages -->
@@ -393,6 +412,7 @@
     <string name="language_system">Predefinita di sistema</string>
     <string name="language_english">English</string>
     <string name="language_italian">Italiano</string>
+    <string name="language_chinese_simplified">简体中文</string>
 
     <!-- Theme Settings -->
     <string name="theme_title">Tema</string>

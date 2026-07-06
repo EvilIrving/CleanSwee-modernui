@@ -1,0 +1,73 @@
+name: Android Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_KEYSTORE_BASE64: ${{ secrets.CLEANSWEEP_RELEASE_KEYSTORE_BASE64 }}
+      RELEASE_KEY_ALIAS: ${{ secrets.CLEANSWEEP_RELEASE_KEY_ALIAS }}
+      RELEASE_STORE_PASSWORD: ${{ secrets.CLEANSWEEP_RELEASE_STORE_PASSWORD }}
+      RELEASE_KEY_PASSWORD: ${{ secrets.CLEANSWEEP_RELEASE_KEY_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Prepare release signing
+        if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' }}
+        run: |
+          echo "$RELEASE_KEYSTORE_BASE64" | base64 --decode > release.keystore
+
+      - name: Build signed release APK
+        if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' }}
+        run: >
+          ./gradlew assembleRelease --stacktrace
+          -PCLEANSWEEP_RELEASE_STORE_FILE="$PWD/release.keystore"
+          -PCLEANSWEEP_RELEASE_KEY_ALIAS="$RELEASE_KEY_ALIAS"
+          -PCLEANSWEEP_RELEASE_STORE_PASSWORD="$RELEASE_STORE_PASSWORD"
+          -PCLEANSWEEP_RELEASE_KEY_PASSWORD="$RELEASE_KEY_PASSWORD"
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleansweep-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+      - name: Upload release APK
+        if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleansweep-release-apk
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
