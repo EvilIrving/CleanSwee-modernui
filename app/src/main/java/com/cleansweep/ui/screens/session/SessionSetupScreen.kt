@@ -23,9 +23,9 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -339,6 +339,12 @@ fun SessionSetupScreen(
                     }
                 } else null
             )
+            SessionStatusStrip(
+                isLoading = uiState.isInitialLoad,
+                isRefreshing = uiState.isRefreshing,
+                selectedCount = uiState.selectedBuckets.size,
+                totalCount = uiState.allFolderDetails.size
+            )
             PullToRefreshBox(
                 isRefreshing = uiState.isRefreshing,
                 onRefresh = viewModel::refreshFolders,
@@ -474,6 +480,92 @@ fun SessionSetupScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SessionStatusStrip(
+    isLoading: Boolean,
+    isRefreshing: Boolean,
+    selectedCount: Int,
+    totalCount: Int
+) {
+    val statusText = when {
+        isRefreshing -> stringResource(R.string.session_refreshing_status)
+        isLoading -> stringResource(R.string.session_loading_status)
+        else -> stringResource(R.string.session_ready_status)
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (isLoading || isRefreshing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircleOutline,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = statusText,
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                StatusToken(
+                    modifier = Modifier.weight(1f),
+                    text = pluralStringResource(R.plurals.selected_folders_status, selectedCount, selectedCount)
+                )
+                StatusToken(
+                    modifier = Modifier.weight(1f),
+                    text = pluralStringResource(R.plurals.available_folders_status, totalCount, totalCount)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatusToken(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+        )
     }
 }
 
@@ -734,7 +826,7 @@ private fun EnhancedFolderItem(
     val cardColors = when {
         isSelected -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
         LocalAppTheme.current == AppTheme.AMOLED -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        else -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+        else -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
     }
 
     val secondaryTextColor = if (isSelected) {
@@ -745,17 +837,17 @@ private fun EnhancedFolderItem(
 
     Card(
         colors = cardColors,
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 2.dp else 0.dp),
         modifier = modifier
             .combinedClickable(
                 interactionSource = interactionSource,
                 indication = LocalIndication.current,
                 onClick = onToggle,
                 onLongClick = { if (!isContextualMode) onLongPress() }
-            )
-            .border(
-                width = if (LocalAppTheme.current == AppTheme.AMOLED) 1.dp else 0.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                shape = CardDefaults.shape
             )
     ) {
         Row(
@@ -768,7 +860,7 @@ private fun EnhancedFolderItem(
             Box {
                 Icon(
                     imageVector = Icons.Default.Folder,
-                    contentDescription = "Folder",
+                    contentDescription = null,
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )

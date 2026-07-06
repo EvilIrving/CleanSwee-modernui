@@ -102,7 +102,8 @@ enum class UnselectScanScope {
 enum class AppLocale(val tag: String?) {
     SYSTEM(null),
     ENGLISH("en"),
-    ITALIAN("it")
+    ITALIAN("it"),
+    CHINESE_SIMPLIFIED("zh-CN")
 }
 
 

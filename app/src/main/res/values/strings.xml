@@ -368,6 +368,26 @@
     <string name="language_system">System Default</string>
     <string name="language_english">English</string>
     <string name="language_italian">Italiano</string>
+    <string name="language_chinese_simplified">简体中文</string>
+
+    <!-- Modern UI Status -->
+    <string name="permission_required_step">Permission required</string>
+    <string name="permission_privacy_note">CleanSweep stays offline. This permission is only used to find, move, and delete media on this device.</string>
+    <string name="session_ready_status">Ready to sort</string>
+    <string name="session_loading_status">Reading media folders</string>
+    <string name="session_refreshing_status">Refreshing folders</string>
+    <plurals name="selected_folders_status">
+        <item quantity="one">1 folder selected</item>
+        <item quantity="other">%1$d folders selected</item>
+    </plurals>
+    <plurals name="available_folders_status">
+        <item quantity="one">1 folder available</item>
+        <item quantity="other">%1$d folders available</item>
+    </plurals>
+    <string name="scan_step_choose">Choose scan type</string>
+    <string name="scan_step_run">Run scan</string>
+    <string name="scan_step_review">Review results</string>
+    <string name="scan_progress_label">%1$d%% complete</string>
 
     <!-- Theme Settings -->
     <string name="theme_title">Theme</string>

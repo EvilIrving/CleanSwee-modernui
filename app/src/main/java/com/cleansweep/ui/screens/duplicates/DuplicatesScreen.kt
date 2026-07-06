@@ -632,6 +632,10 @@ private fun IdleView(
         .padding(24.dp)
         .verticalScroll(rememberScrollState())
     ) {
+        ScanStepStrip(activeStep = 0)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         ScanScopeInfoCard(
             scanScope = scanScope,
             includeList = includeList,
@@ -641,7 +645,12 @@ private fun IdleView(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
             Column {
                 ScanTypeSelectorRow(
                     stringResource(R.string.scan_exact_duplicates_title),
@@ -700,6 +709,50 @@ private fun IdleView(
                 modifier = Modifier.fillMaxWidth(0.8f)
             ) {
                 Text(stringResource(R.string.view_last_scan_results))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScanStepStrip(activeStep: Int) {
+    val steps = listOf(
+        stringResource(R.string.scan_step_choose),
+        stringResource(R.string.scan_step_run),
+        stringResource(R.string.scan_step_review)
+    )
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            steps.forEachIndexed { index, label ->
+                val isActive = index == activeStep
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = MaterialTheme.shapes.small,
+                    color = if (isActive) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+                    contentColor = if (isActive) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                    border = BorderStroke(
+                        1.dp,
+                        if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                    )
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+                    )
+                }
             }
         }
     }
@@ -811,18 +864,36 @@ private fun ScanTypeSelectorRow(title: String, description: String, icon: ImageV
 @Composable
 private fun ScanningView(progress: Float, phase: String?, onCancelScan: () -> Unit) {
     val isCancellable = phase != stringResource(R.string.scanning_preparing_phase)
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(horizontal = 32.dp)) {
-        Text(phase ?: stringResource(R.string.scanning_phase), style = MaterialTheme.typography.titleLarge)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(horizontal = 24.dp)) {
+        ScanStepStrip(activeStep = 1)
         Spacer(modifier = Modifier.height(16.dp))
-        LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "${(progress * 100).toInt()}%", style = MaterialTheme.typography.bodyMedium)
-        Spacer(modifier = Modifier.height(24.dp))
-        OutlinedButton(
-            onClick = onCancelScan,
-            enabled = isCancellable
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         ) {
-            Text(stringResource(R.string.cancel_scan))
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(20.dp)
+            ) {
+                Text(phase ?: stringResource(R.string.scanning_phase), style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(16.dp))
+                LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.scan_progress_label, (progress * 100).toInt()),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                OutlinedButton(
+                    onClick = onCancelScan,
+                    enabled = isCancellable
+                ) {
+                    Text(stringResource(R.string.cancel_scan))
+                }
+            }
         }
     }
 }
@@ -840,10 +911,16 @@ private fun ResultsView(
 
     Column(Modifier.fillMaxSize()) {
         if (uiState.scanState == ScanState.Scanning) {
-            Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Column(Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+                ScanStepStrip(activeStep = 1)
+                Spacer(Modifier.height(8.dp))
                 Text(uiState.scanProgressPhase ?: stringResource(R.string.scanning_phase), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(4.dp))
                 LinearProgressIndicator(progress = { uiState.scanProgress }, modifier = Modifier.fillMaxWidth())
+            }
+        } else if (uiState.scanState == ScanState.Complete) {
+            Box(Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+                ScanStepStrip(activeStep = 2)
             }
         }
 
