@@ -1,16 +1,12 @@
 name: Android Build
 
 on:
-  workflow_dispatch:
-    inputs:
-      release_tag:
-        description: GitHub Release tag to create, such as v1.0.0-test. Leave empty to skip release creation.
-        required: false
-        type: string
   push:
     branches:
       - main
       - master
+    tags:
+      - "v*"
   pull_request:
 
 permissions:
@@ -78,11 +74,11 @@ jobs:
           if-no-files-found: error
 
       - name: Create GitHub Release
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag != '' }}
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.release_tag }}
-          name: CleanSweep ${{ inputs.release_tag }}
+          tag_name: ${{ github.ref_name }}
+          name: CleanSweep ${{ github.ref_name }}
           body: |
             Debug APK for personal installation.
 
