@@ -2,6 +2,11 @@ name: Android Build
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: GitHub Release tag to create, such as v1.0.0-test. Leave empty to skip release creation.
+        required: false
+        type: string
   push:
     branches:
       - main
@@ -9,7 +14,7 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -71,3 +76,18 @@ jobs:
           name: cleansweep-release-apk
           path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
+
+      - name: Create GitHub Release
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag != '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          name: CleanSweep ${{ inputs.release_tag }}
+          body: |
+            Debug APK for personal installation.
+
+            If Android refuses to update an existing install, uninstall the old app first and install this APK again.
+          files: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/release/*.apk
+          fail_on_unmatched_files: false
